@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".OldApiCallActivity">
+
+    <ImageView
+        android:id="@+id/yoga_icon"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/lotus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Yoga Icon" />
+
+    <LinearLayout
+        android:id="@+id/checkboxes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/yoga_icon"
+        app:layout_constraintWidth_percent="0.4"
+        >
+        <!-- Categories Checkboxes (Left) -->
+        <LinearLayout
+            android:id="@+id/categories_layout_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            >
+
+
+
+            <TextView
+                android:id="@+id/core_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Core and Upper Body"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/chest_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chest" />
+
+            <CheckBox
+                android:id="@+id/arm_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Arm" />
+
+            <TextView
+                android:id="@+id/lower_body_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lower Body"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/hip_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hip" />
+
+            <CheckBox
+                android:id="@+id/standing_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Standing" />
+
+            <TextView
+                android:id="@+id/spine_back_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Spine and Back"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/backbend_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Backbend" />
+
+            <CheckBox
+                android:id="@+id/forward_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Forward" />
+
+            <CheckBox
+                android:id="@+id/inversion_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Inversion" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/category_layout_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:id="@+id/full_body_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Full Body"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/strengthening_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Strengthening" />
+
+            <CheckBox
+                android:id="@+id/balancing_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Balancing" />
+
+            <!-- Group Title -->
+            <TextView
+                android:id="@+id/recovery_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Recovery and Relaxation"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/seated_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Seated" />
+
+            <CheckBox
+                android:id="@+id/restorative_checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Restorative" />
+
+            <!-- Group Title -->
+            <TextView
+                android:id="@+id/difficulty_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Difficulty"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+
+            <CheckBox
+                android:id="@+id/beginner_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Beginner" />
+
+            <CheckBox
+                android:id="@+id/intermediate_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Intermediate" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <!-- Exercise Amount Input -->
+    <LinearLayout
+        android:id="@+id/exercise_amount_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/checkboxes">
+
+        <TextView
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:text="Rounds:" />
+
+        <Button
+            android:id="@+id/minus_button"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:text="-" />
+
+        <EditText
+            android:id="@+id/exercise_amount_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:text="10"
+            android:textAlignment="center" />
+
+        <Button
+            android:id="@+id/plus_button"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:text="+" />
+
+    </LinearLayout>
+
+    <!-- Exercise Time Input -->
+    <LinearLayout
+        android:id="@+id/exercise_time_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exercise_amount_layout">
+
+        <TextView
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Seconds per round:"
+            android:layout_marginEnd="8dp"/>
+
+
+        <EditText
+            android:id="@+id/exercise_time_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="numberDecimal"
+            android:text="60"
+            android:textAlignment="center" />
+
+    </LinearLayout>
+
+    <!-- Start Button -->
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+
+        android:text="Start Training"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exercise_time_layout" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
