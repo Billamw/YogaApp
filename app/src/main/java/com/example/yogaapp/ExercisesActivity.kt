@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import org.json.JSONObject
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 
@@ -27,15 +28,8 @@ class ExercisesActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.exercises_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        poseAdapter = PoseAdapter(poses)
+        poseAdapter = PoseAdapter(poses, this)
         recyclerView.adapter = poseAdapter
-
-//        val assetManager: AssetManager = assets
-//        val inputStream: InputStream = assetManager.open("poses.json")
-//        val jsonString = inputStream.bufferedReader().use { it.readText() }
-//        val gson = Gson()
-//        val typeToken = object : TypeToken<List<Pose>>() {}.type
-//        poses = gson.fromJson(jsonString, typeToken)
 
         addPoseButton = findViewById(R.id.add_pose_button)
         addPoseButton.setOnClickListener {
@@ -52,15 +46,14 @@ class ExercisesActivity : AppCompatActivity() {
 
     private fun loadPoses() {
         try {
+            val file = File(MainActivity.poseDataFilePath)
+            val json = file.readText()
 
-            val inputStream = assets.open("poses_data.json")
-            val size = inputStream.available()
-            val buffer = ByteArray(size)
-            inputStream.read(buffer)
-            inputStream.close()
-            val json = String(buffer)
             val jsonObject = JSONObject(json)
             val jsonArray = jsonObject.getJSONArray("poses")
+
+            poses.clear() // Clear existing poses before loading
+
             for (i in 0 until jsonArray.length()) {
                 val poseObject = jsonArray.getJSONObject(i)
                 val name = poseObject.getString("english_name")
@@ -72,14 +65,15 @@ class ExercisesActivity : AppCompatActivity() {
                 val imageUrl = poseObject.getString("url_png")
                 poses.add(Pose(name, description, benefits, groups, imageUrl))
             }
-            Log.i("Load", "added all poses")
+
+            Log.i("Load", "Added all poses")
             poseAdapter.notifyDataSetChanged()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             e.printStackTrace()
-            Log.e("Error", "Load failed")
-        }
-        finally{
-            Log.i("Load", "Load successful")
+            Log.e("Error", "Load failed: ${e.message}")
+        } finally {
+            Log.i("Load", "Load process completed")
         }
     }
+
 }
