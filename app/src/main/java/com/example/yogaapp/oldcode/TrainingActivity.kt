@@ -1,4 +1,4 @@
-package com.example.yogaapp
+package com.example.yogaapp.oldcode
 
 //import android.icu.util.TimeUnit
 import android.content.Intent
@@ -21,6 +21,8 @@ import java.io.InputStreamReader
 import java.net.URL
 import org.json.JSONObject
 import com.bumptech.glide.Glide
+import com.example.yogaapp.MainActivity
+import com.example.yogaapp.R
 
 class TrainingActivity : AppCompatActivity() {
 
@@ -42,7 +44,7 @@ class TrainingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_training)
+        setContentView(R.layout.activity_current_training_pose)
 
         // Initialize UI elements
         poseImageView = findViewById(R.id.poseImageView)

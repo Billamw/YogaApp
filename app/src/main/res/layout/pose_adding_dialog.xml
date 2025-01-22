@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/iv_pose_image"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/btn_select_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Select Image" />
+
+        <EditText
+            android:id="@+id/et_pose_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pose Name" />
+
+        <EditText
+            android:id="@+id/et_pose_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description" />
+
+        <EditText
+            android:id="@+id/et_pose_benefits"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Benefits" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Groups:" />
+
+        <LinearLayout
+            android:id="@+id/ll_categories"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- Category checkboxes will be added here programmatically -->
+        </LinearLayout>
+
+
+    </LinearLayout>
+</ScrollView>

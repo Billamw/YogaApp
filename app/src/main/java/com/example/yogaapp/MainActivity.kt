@@ -1,14 +1,12 @@
 package com.example.yogaapp
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.example.yogaapp.objects.JsonHelper
+import com.example.yogaapp.oldcode.OldApiCallActivity
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,14 +24,20 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Copy pose_data.json to local storage
-        copyPoseDataToLocalStorageOnce()
+        poseDataFilePath = File(filesDir, POSE_DATA_FILENAME).absolutePath
+        JsonHelper.copyPoseDataToLocalStorageOnce(this, assets)
 
         exercisesButton = findViewById(R.id.exercises_button)
         trainingsButton = findViewById(R.id.trainings_button)
         oldCallButton = findViewById(R.id.old_call_button)
 
         exercisesButton.setOnClickListener {
-            val intent = Intent(this, ExercisesActivity::class.java)
+            val intent = Intent(this, PoseActivity::class.java)
+            startActivity(intent)
+        }
+
+        trainingsButton.setOnClickListener {
+            val intent = Intent(this, TrainingsActivity::class.java)
             startActivity(intent)
         }
 
@@ -43,31 +47,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun copyPoseDataToLocalStorageOnce() {
-        val sharedPrefs = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-        val isDataCopied = sharedPrefs.getBoolean("isPoseDataCopied", false)
-        if (!isDataCopied) {
-            try {
-                val inputStream = assets.open(POSE_DATA_FILENAME)
-                val outputFile = File(filesDir, POSE_DATA_FILENAME)
-
-                FileOutputStream(outputFile).use { output ->
-                    inputStream.copyTo(output)
-                }
-
-                poseDataFilePath = outputFile.absolutePath
-                Log.i("copyPoseDataToLocalStorageOnce", "poseDataFilePath: $poseDataFilePath")
-
-                // Set the flag to true after successful copy
-                sharedPrefs.edit().putBoolean("isPoseDataCopied", true).apply()
-            } catch (e: IOException) {
-                e.printStackTrace()
-                // Handle the error
-                Log.e("copyPoseDataToLocalStorageOnce", "Error copying pose data: ${e.message}")
-            }
-        } else {
-            // File has already been copied, just set the path
-            poseDataFilePath = File(filesDir, POSE_DATA_FILENAME).absolutePath
-        }
-    }
 }

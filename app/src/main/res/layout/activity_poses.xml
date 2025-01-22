@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ExercisesActivity">
+    tools:context=".PoseActivity">
 
     <ImageView
         android:id="@+id/yoga_icon"
@@ -28,7 +28,7 @@
         app:layout_constraintBottom_toTopOf="@+id/add_pose_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/pose" />
+        tools:listitem="@layout/pose_item" />
 
     <Button
         android:id="@+id/add_pose_button"

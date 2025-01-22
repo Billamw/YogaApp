@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
     <application
         android:allowBackup="true"
@@ -15,13 +17,16 @@
         android:theme="@style/Theme.YogaApp"
         tools:targetApi="31">
         <activity
-            android:name=".OldApiCallActivity"
+            android:name=".TrainingsActivity"
             android:exported="false" />
         <activity
-            android:name=".ExercisesActivity"
+            android:name=".oldcode.OldApiCallActivity"
             android:exported="false" />
         <activity
-            android:name=".TrainingActivity"
+            android:name=".PoseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".oldcode.TrainingActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

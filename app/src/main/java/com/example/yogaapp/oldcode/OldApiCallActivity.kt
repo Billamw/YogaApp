@@ -1,13 +1,13 @@
-package com.example.yogaapp
+package com.example.yogaapp.oldcode
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.yogaapp.R
 
 class OldApiCallActivity : AppCompatActivity() {
     // UI Elements
