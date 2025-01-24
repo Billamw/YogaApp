@@ -14,11 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.yogaapp.dataclasses.Pose
+import com.example.yogaapp.objects.AddPoseDialog
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-class PoseActivity : AppCompatActivity() {
+class PoseActivity : AppCompatActivity(), AddPoseDialog.OnPoseAddedListener {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var poseAdapter: PoseAdapter
@@ -87,143 +88,6 @@ class PoseActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAddPoseDialog() {
-        val dialogView = layoutInflater.inflate(R.layout.pose_adding_dialog, null)
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setTitle("Add New Pose")
-            .setPositiveButton("Add", null)
-            .setNegativeButton("Cancel", null)
-            .create()
-
-        dialog.setOnShowListener {
-            val addButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            addButton.setOnClickListener {
-                val name = dialogView.findViewById<EditText>(R.id.et_pose_name).text.toString()
-                val description = dialogView.findViewById<EditText>(R.id.et_pose_description).text.toString()
-                val benefits = dialogView.findViewById<EditText>(R.id.et_pose_benefits).text.toString()
-                val selectedCategories = getSelectedCategories(dialogView)
-                Log.i("showAddPoseDialog", "selectedCategories: ${selectedCategories.toString()}")
-
-                // Check if the pose name already exists
-                if (poses.any { it.name.equals(name, ignoreCase = true) }) {
-                    Toast.makeText(this, "Pose name already exists!", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                if (name.isNotBlank() && description.isNotBlank() && benefits.isNotBlank()) {
-                    val newPose = Pose(name, description, benefits, selectedCategories?: emptyList(), "")
-                    poses.add(newPose)
-                    poseAdapter.notifyDataSetChanged()
-                    savePoses()
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(this, "Please fill all fields and select at least one category", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        populateCategoriesInDialog(dialogView)
-        dialog.show()
-    }
-
-    private fun getSelectedCategories(dialogView: View): List<String> {
-        val categoriesLayout = dialogView.findViewById<LinearLayout>(R.id.ll_categories)
-        val selectedCategories = mutableListOf<String>()
-
-        fun searchCheckboxes(parent: View) {
-            if (parent is CheckBox) {
-                if (parent.isChecked) {
-                    val categoryName = parent.text.toString()
-                    selectedCategories.add(categoryName)
-
-                    // Check if this is a new category and add it to the JSON
-                    if (!categories.any { it.getString("category_name") == categoryName }) {
-                        val newCategory = JSONObject()
-                        newCategory.put("category_name", categoryName)
-                        newCategory.put("category_description", "")
-                        categories.add(newCategory)
-                    }
-                }
-            } else if (parent is ViewGroup) {
-                for (i in 0 until parent.childCount) {
-                    searchCheckboxes(parent.getChildAt(i))
-                }
-            }
-        }
-
-        searchCheckboxes(categoriesLayout)
-        return selectedCategories
-    }
-
-    private fun populateCategoriesInDialog(dialogView: View) {
-        val categoriesLayout = dialogView.findViewById<LinearLayout>(R.id.ll_categories)
-        categoriesLayout.orientation = LinearLayout.VERTICAL
-
-        val columnLayout = LinearLayout(this)
-        columnLayout.orientation = LinearLayout.HORIZONTAL
-        columnLayout.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        val leftColumn = LinearLayout(this)
-        leftColumn.orientation = LinearLayout.VERTICAL
-        leftColumn.layoutParams = LinearLayout.LayoutParams(
-            0,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            1f
-        )
-
-        val rightColumn = LinearLayout(this)
-        rightColumn.orientation = LinearLayout.VERTICAL
-        rightColumn.layoutParams = LinearLayout.LayoutParams(
-            0,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            1f
-        )
-
-        columnLayout.addView(leftColumn)
-        columnLayout.addView(rightColumn)
-
-        categories.forEachIndexed { index, category ->
-            val checkBox = CheckBox(this)
-            checkBox.text = category.getString("category_name")
-            if (index % 2 == 0) {
-                leftColumn.addView(checkBox)
-            } else {
-                rightColumn.addView(checkBox)
-            }
-        }
-
-        categoriesLayout.addView(columnLayout)
-
-        // Add the editable checkbox and EditText at the bottom
-        val editableCheckBox = CheckBox(this)
-        val editText = EditText(this)
-        editText.textSize = 16f
-        editText.hint = "Add new category"
-        editText.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        editText.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                editableCheckBox.isChecked = true
-            }
-        }
-        editableCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked && editText.text.isEmpty()) {
-                editText.requestFocus()
-            }
-        }
-        val container = LinearLayout(this)
-        container.orientation = LinearLayout.HORIZONTAL
-        container.addView(editableCheckBox)
-        container.addView(editText)
-        categoriesLayout.addView(container)
-    }
-
     private fun savePoses() {
         try {
             val jsonObject = JSONObject()
@@ -257,5 +121,21 @@ class PoseActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("Error", "Failed to save poses and categories: ${e.message}")
         }
+    }
+
+    private fun showAddPoseDialog() {
+        AddPoseDialog(
+            context = this,
+            existingPoses = poses,
+            categories = categories,
+            listener = this
+        ).show()
+    }
+
+    override fun onPoseAdded(newPose: Pose, updatedCategories: List<JSONObject>) {
+        poses.add(newPose)
+        categories.addAll(updatedCategories)
+        poseAdapter.notifyDataSetChanged()
+        savePoses()
     }
 }

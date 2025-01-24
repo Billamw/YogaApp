@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Groups:" />
+            android:text="Categories:" />
 
         <LinearLayout
             android:id="@+id/ll_categories"
