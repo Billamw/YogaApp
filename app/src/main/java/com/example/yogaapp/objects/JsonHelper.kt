@@ -52,7 +52,7 @@ object JsonHelper {
 
                 // Save modified JSON
                 val outputFile = File(context.filesDir, MainActivity.POSE_DATA_FILENAME)
-                outputFile.writeText(jsonObject.toString())
+                outputFile.writeText(jsonObject.toString(4))
 
                 MainActivity.poseDataFilePath = outputFile.absolutePath
                 Log.i("copyPoseDataToLocalStorageOnce", "poseDataFilePath: ${MainActivity.poseDataFilePath}")
@@ -103,7 +103,7 @@ object JsonHelper {
 
             // Save the updated JSON back to internal storage
             context.openFileOutput(MainActivity.POSE_DATA_FILENAME, Context.MODE_PRIVATE).use { output ->
-                output.write(jsonObject.toString().toByteArray())
+                output.write(jsonObject.toString(4).toByteArray())
             }
 
             Toast.makeText(context, "JSON file updated!", Toast.LENGTH_SHORT).show()
@@ -128,7 +128,7 @@ object JsonHelper {
             }
 
             // Save the updated JSON back to internal storage
-            file.writeText(jsonObject.toString())
+            file.writeText(jsonObject.toString(4))
 
             // Remove the pose from the local list and update the adapter
             (context as? PoseActivity)?.let { activity ->
@@ -192,7 +192,7 @@ object JsonHelper {
 
             jsonObject.put("trainings", trainingsArray)
 
-            file.writeText(jsonObject.toString())
+            file.writeText(jsonObject.toString(4))
             Toast.makeText(context, "Trainings saved successfully", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("JsonHelper", "Error saving trainings: ${e.message}")
@@ -216,7 +216,7 @@ object JsonHelper {
                 }
             }
 
-            file.writeText(jsonObject.toString())
+            file.writeText(jsonObject.toString(4))
             Toast.makeText(context, "Training updated successfully", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("JsonHelper", "Error updating training: ${e.message}")
@@ -237,7 +237,7 @@ object JsonHelper {
                 }
             }
 
-            file.writeText(jsonObject.toString())
+            file.writeText(jsonObject.toString(4))
             Toast.makeText(context, "Training deleted successfully", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("JsonHelper", "Error deleting training: ${e.message}")

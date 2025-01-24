@@ -55,6 +55,13 @@
             <!-- Category checkboxes will be added here programmatically -->
         </LinearLayout>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_add_pose"
+            android:layout_marginTop="16dp"
+            android:text="Add Pose" />
+
 
     </LinearLayout>
 </ScrollView>

@@ -1,63 +1,103 @@
 package com.example.yogaapp.objects
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import com.example.yogaapp.R
 import com.example.yogaapp.dataclasses.Pose
 import org.json.JSONObject
 
-class AddPoseDialog(
-    private val context: Context,
-    private val existingPoses: List<Pose>,
-    private val categories: MutableList<JSONObject>,
-    private val listener: OnPoseAddedListener
-) {
-    private lateinit var dialog: AlertDialog
-    private lateinit var dialogView: View
+@SuppressLint("StaticFieldLeak")
+object AddPoseDialog {
+    const val IMAGE_PICK_REQUEST = 1
+    private var currentImageView: ImageView? = null
+    var selectedImageUri: Uri? = null
+    private var currentContext: Context? = null
 
-    interface OnPoseAddedListener {
-        fun onPoseAdded(newPose: Pose, updatedCategories: List<JSONObject>)
+    fun handleImageSelected(uri: Uri) {
+
+        currentImageView?.let { imageView ->
+            currentContext?.let { context ->
+                // Load image using Glide (recommended)
+                Glide.with(context)
+                    .load(uri)
+                    .into(imageView)
+
+                selectedImageUri = uri
+            }
+        }
     }
 
-    fun show() {
-        createDialog()
-        setupViews()
+    fun show(
+        context: Context,
+        existingPoses: List<Pose>,
+        categories: List<JSONObject>,
+        onPoseAdded: (Pose, List<JSONObject>, String?) -> Unit // Correct parameter types
+    ) {
+        currentContext = context
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.pose_adding_dialog, null)
+        val dialog = AlertDialog.Builder(context).create()
+        dialog.setView(dialogView)
+
+        currentImageView = dialogView.findViewById(R.id.iv_pose_image)
+
+
+        val selectImageButton = dialogView.findViewById<Button>(R.id.btn_select_image)
+        val nameEditText = dialogView.findViewById<EditText>(R.id.et_pose_name)
+        val descEditText = dialogView.findViewById<EditText>(R.id.et_pose_description)
+        val benefitsEditText = dialogView.findViewById<EditText>(R.id.et_pose_benefits)
+        val categoriesContainer = dialogView.findViewById<LinearLayout>(R.id.ll_categories)
+        val addButton = dialogView.findViewById<Button>(R.id.btn_add_pose)
+
+        // Populate categories
+        populateCategories(currentContext ?: context, categoriesContainer, categories)
+
+        selectImageButton.setOnClickListener {
+            // Start image picker
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "image/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/svg+xml", "image/png", "image/jpeg"))
+            }
+            (context as Activity).startActivityForResult(intent, IMAGE_PICK_REQUEST)
+        }
+
+        addButton.setOnClickListener {
+            val name = nameEditText.text.toString()
+            val description = descEditText.text.toString()
+            val benefits = benefitsEditText.text.toString()
+            val selectedCategories = getSelectedCategories(categoriesContainer)
+            val newCategories = getNewCategories(categoriesContainer, categories)
+
+            if (validateInput(name, existingPoses, context)) {
+                val newPose = Pose(
+                    name = name,
+                    description = description,
+                    benefits = benefits,
+                    categories = selectedCategories,
+                    localImagePath = selectedImageUri?.toString()
+                )
+                onPoseAdded(newPose, newCategories, selectedImageUri?.toString())
+                dialog.dismiss()
+            }
+        }
+
         dialog.show()
     }
 
-    private fun createDialog() {
-        dialogView = LayoutInflater.from(context).inflate(R.layout.pose_adding_dialog, null)
-        dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .setTitle("Add New Pose")
-            .setPositiveButton("Add", null)
-            .setNegativeButton("Cancel", null)
-            .create()
-    }
-
-    private fun setupViews() {
-        setupCategorySelection()
-        setupAddButton()
-    }
-
-    private fun setupCategorySelection() {
-        val categoriesLayout = dialogView.findViewById<LinearLayout>(R.id.ll_categories)
-        categoriesLayout.removeAllViews()
-
-        // Create two columns for existing categories
-        val (leftColumn, rightColumn) = createCategoryColumns()
-        populateExistingCategories(leftColumn, rightColumn)
-        addNewCategoryInput(categoriesLayout)
-    }
-
-    private fun createCategoryColumns(): Pair<LinearLayout, LinearLayout> {
+    private fun populateCategories(context: Context, container: LinearLayout, categories: List<JSONObject>) {
+        container.removeAllViews()
         val columnLayout = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -66,41 +106,34 @@ class AddPoseDialog(
             )
         }
 
-        return Pair(
-            LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            },
-            LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            }
-        ).also { (left, right) ->
-            columnLayout.addView(left)
-            columnLayout.addView(right)
-        }
-    }
+        val leftColumn = createCategoryColumn(container)
+        val rightColumn = createCategoryColumn(container)
 
-    private fun populateExistingCategories(left: LinearLayout, right: LinearLayout) {
         categories.forEachIndexed { index, category ->
             val checkBox = CheckBox(context).apply {
                 text = category.getString("category_name")
             }
-            if (index % 2 == 0) left.addView(checkBox) else right.addView(checkBox)
+            if (index % 2 == 0) leftColumn.addView(checkBox) else rightColumn.addView(checkBox)
         }
+
+        columnLayout.addView(leftColumn)
+        columnLayout.addView(rightColumn)
+        container.addView(columnLayout)
+
+        addNewCategoryInput(context, container)
     }
 
-    private fun addNewCategoryInput(container: LinearLayout) {
-        val (checkBox, editText) = createNewCategoryInput()
+    private fun addNewCategoryInput(context: Context, container: LinearLayout) {
+        val (checkBox, editText) = createNewCategoryInput(context)
         val inputContainer = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             addView(checkBox)
             addView(editText)
+            container.addView(this)
         }
-        container.addView(inputContainer)
     }
 
-    private fun createNewCategoryInput(): Pair<CheckBox, EditText> {
+    private fun createNewCategoryInput(context: Context): Pair<CheckBox, EditText> {
         return Pair(
             CheckBox(context),
             EditText(context).apply {
@@ -110,80 +143,63 @@ class AddPoseDialog(
                         (checkBox as CheckBox).isChecked = hasFocus
                     }
                 }
-            }
-        )
+            })
     }
 
-    private fun setupAddButton() {
-        dialog.setOnShowListener {
-            val addButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            addButton.setOnClickListener {
-                val newPose = validateInput() ?: return@setOnClickListener
-                val (selectedCategories, newCategories) = getSelectedCategories()
 
-                listener.onPoseAdded(
-                    newPose.copy(categories = selectedCategories),
-                    categories.apply { addAll(newCategories) }
-                )
-                dialog.dismiss()
-            }
+    private fun createCategoryColumn(container: LinearLayout): LinearLayout {
+        return LinearLayout(container.context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+            )
         }
     }
 
-    private fun validateInput(): Pose? {
-        val name = dialogView.findViewById<EditText>(R.id.et_pose_name).text.toString()
-        val description = dialogView.findViewById<EditText>(R.id.et_pose_description).text.toString()
-        val benefits = dialogView.findViewById<EditText>(R.id.et_pose_benefits).text.toString()
-
-        return when {
-            existingPoses.any { it.name.equals(name, true) } -> {
-                showError("Pose name already exists!")
-                null
-            }
-            name.isBlank() || description.isBlank() || benefits.isBlank() -> {
-                showError("Please fill all required fields")
-                null
-            }
-            else -> Pose(name, description, benefits, emptyList(), "")
-        }
-    }
-
-    private fun getSelectedCategories(): Pair<List<String>, List<JSONObject>> {
+    private fun getSelectedCategories(container: LinearLayout): List<String> {
         val selected = mutableListOf<String>()
-        val newCategories = mutableListOf<JSONObject>()
-
-        dialogView.findViewById<LinearLayout>(R.id.ll_categories).traverseViews { view ->
-            if (view is CheckBox && view.isChecked) {
-                val categoryName = when (view.parent) {
-                    is LinearLayout -> (view.parent as LinearLayout)
-                        .getChildAt(1)?.let { (it as? EditText)?.text?.toString() }
-                        ?: view.text.toString()
-                    else -> view.text.toString()
-                }
-
-                if (categoryName.isNotBlank()) {
-                    selected.add(categoryName)
-                    if (categories.none { it.getString("category_name") == categoryName }) {
-                        newCategories.add(JSONObject().apply {
-                            put("category_name", categoryName)
-                            put("category_description", "")
-                        })
+        for (i in 0 until container.childCount) {
+            val column = container.getChildAt(i) as? LinearLayout
+            column?.let {
+                for (j in 0 until it.childCount) {
+                    val checkBox = it.getChildAt(j) as? CheckBox
+                    checkBox?.let { cb ->
+                        if (cb.isChecked) {
+                            selected.add(cb.text.toString())
+                        }
                     }
                 }
             }
         }
-
-        return Pair(selected, newCategories)
+        return selected
     }
 
-    private fun showError(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    private fun getNewCategories(container: LinearLayout, existingCategories: List<JSONObject>): List<JSONObject> {
+        // Implement if you have new category creation in your UI
+        return emptyList()
     }
 
-    private fun ViewGroup.traverseViews(action: (View) -> Unit) {
-        for (i in 0 until childCount) {
-            val child = getChildAt(i)
-            if (child is ViewGroup) child.traverseViews(action) else action(child)
+    private fun validateInput(
+        name: String,
+        existingPoses: List<Pose>,
+        context: Context
+    ): Boolean {
+        return when {
+            name.isBlank() -> {
+                showError("Please fill all fields", context)
+                false
+            }
+            existingPoses.any { it.name.equals(name, true) } -> {
+                showError("Pose name already exists!", context)
+                false
+            }
+            else -> true
         }
+    }
+
+    private fun showError(message: String, context: Context) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }

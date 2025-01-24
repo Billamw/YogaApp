@@ -1,15 +1,10 @@
 package com.example.yogaapp
 
-import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +14,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
-class PoseActivity : AppCompatActivity(), AddPoseDialog.OnPoseAddedListener {
+class PoseActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var poseAdapter: PoseAdapter
@@ -123,19 +118,54 @@ class PoseActivity : AppCompatActivity(), AddPoseDialog.OnPoseAddedListener {
         }
     }
 
-    private fun showAddPoseDialog() {
-        AddPoseDialog(
-            context = this,
-            existingPoses = poses,
-            categories = categories,
-            listener = this
-        ).show()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == AddPoseDialog.IMAGE_PICK_REQUEST && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                // Persist permission for future access
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                AddPoseDialog.handleImageSelected(uri)
+            }
+        }
     }
 
-    override fun onPoseAdded(newPose: Pose, updatedCategories: List<JSONObject>) {
-        poses.add(newPose)
+    private fun onPoseAdded(newPose: Pose, updatedCategories: List<JSONObject>, imagePath: String?) {
+        val savedPath = imagePath?.let { uriString ->
+            saveImageToInternalStorage(Uri.parse(uriString), newPose.name)
+        }
+
+        poses.add(newPose.copy(localImagePath = savedPath ?: imagePath ?: ""))
         categories.addAll(updatedCategories)
         poseAdapter.notifyDataSetChanged()
         savePoses()
+    }
+
+    private fun saveImageToInternalStorage(uri: Uri, poseName: String): String? {
+        return try {
+            val imagesDir = File(filesDir, "pose_images").apply { mkdirs() }
+            val outputFile = File(imagesDir, "${poseName.replace(" ", "_")}.png")
+
+            contentResolver.openInputStream(uri)?.use { input ->
+                outputFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            outputFile.absolutePath
+        } catch (e: Exception) {
+            Log.e("SaveImage", "Error saving image: ${e.message}")
+            null
+        }
+    }
+    private fun showAddPoseDialog() {
+        AddPoseDialog.show(
+            context = this,
+            existingPoses = poses,
+            categories = categories
+        ) { newPose, newCategories, imagePath -> // Receive parameters from dialog
+            onPoseAdded(newPose, newCategories, imagePath)
+        }
     }
 }
