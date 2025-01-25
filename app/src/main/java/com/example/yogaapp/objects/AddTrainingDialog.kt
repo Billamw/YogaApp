@@ -1,6 +1,5 @@
 package com.example.yogaapp.objects
 
-
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
@@ -15,7 +14,8 @@ import com.example.yogaapp.dataclasses.Pose
 import com.example.yogaapp.dataclasses.Training
 
 object AddTrainingDialog {
-    fun showTrainingDialog(pose: Pose, context: Context) {
+
+    fun showTrainingDialog(context: Context, pose: Pose?) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.training_adding_dialog, null)
         val dialog = AlertDialog.Builder(context).create()
         dialog.setView(dialogView)
@@ -26,8 +26,19 @@ object AddTrainingDialog {
         val trainings = JsonHelper.loadTrainingsFromJson(context)
         val trainingAdapter = TrainingAdapter(
             trainings,
-            onTrainingClick = { /* Implement if needed */ },
+            onItemClick = { selectedTraining ->
+                pose?.let { nonNullPose ->
+                    // Add pose to training if it's not null
+                    selectedTraining.poses_by_UUID.add(nonNullPose.uuid)
+                    JsonHelper.addPoseToTraining(selectedTraining, nonNullPose, context)
+
+                    // Optional: Show visual feedback
+                    Toast.makeText(context, "Pose added to ${selectedTraining.name}", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
         )
+
         trainingsList.adapter = trainingAdapter
         trainingsList.layoutManager = LinearLayoutManager(context)
 

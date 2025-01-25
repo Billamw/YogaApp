@@ -28,7 +28,7 @@ class PoseAdapter(val poses: MutableList<Pose>, private val context: Context) : 
     class PoseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val poseImage: ImageView = itemView.findViewById(R.id.pose_image)
         val poseName: TextView = itemView.findViewById(R.id.pose_name)
-        val addButton: ImageButton = itemView.findViewById(R.id.add_button)
+        val addButton: ImageButton = itemView.findViewById(R.id.add_to_training_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PoseViewHolder {
@@ -58,7 +58,7 @@ class PoseAdapter(val poses: MutableList<Pose>, private val context: Context) : 
         }
 
         holder.addButton.setOnClickListener {
-            AddTrainingDialog.showTrainingDialog(pose, context)
+            AddTrainingDialog.showTrainingDialog(context, pose)
         }
     }
 

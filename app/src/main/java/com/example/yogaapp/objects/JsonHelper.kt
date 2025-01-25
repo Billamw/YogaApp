@@ -12,7 +12,7 @@ import com.example.yogaapp.dataclasses.Training
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.net.URL
+import java.util.UUID
 
 object JsonHelper {
 
@@ -32,15 +32,12 @@ object JsonHelper {
                     val poseObject = posesArray.getJSONObject(i)
                     val englishName = poseObject.getString("english_name")
                     val svgUrl = poseObject.getString("url_svg")
-
-                    // Download SVG
-                    val svgFileName = "${englishName.replace(" ", "_")}.svg"
-                    val svgFile = File(context.filesDir, svgFileName)
-                    downloadFile(svgUrl, svgFile)
+                    val uuid = UUID.randomUUID().toString()
 
                     // Update JSON object
+                    poseObject.put("uuid", uuid)
                     poseObject.put("pose_name", englishName)
-                    poseObject.put("local_svg_path", svgFile.absolutePath)
+                    poseObject.put("local_svg_path", "")
                     poseObject.remove("id")
                     poseObject.remove("sanskrit_name_adapted")
                     poseObject.remove("sanskrit_name")
@@ -68,48 +65,120 @@ object JsonHelper {
         }
     }
 
-    private fun downloadFile(url: String, file: File) {
-        try {
-            val inputStream = URL(url).openStream()
-            file.outputStream().use { output ->
-                inputStream.copyTo(output)
-            }
-        } catch (e: Exception) {
-            Log.e("downloadFile", "Error downloading file: ${e.message}")
-        }
-    }
-
     private fun getJsonObject(): JSONObject {
         val json = file.readText()
         return JSONObject(json)
     }
 
-    fun updatePoseInJson(updatedPose: Pose, oldName: String, context: Context) {
-        try {
-            val jsonObject = getJsonObject()
-            val jsonArray = jsonObject.getJSONArray("poses")
+    //############### Pose helper ###############//
 
-            // Find and update the pose by name
-            for (i in 0 until jsonArray.length()) {
-                val poseObject = jsonArray.getJSONObject(i)
-                if (poseObject.getString("english_name") == oldName) {
-                    Log.i("updatePoseInJson", "Updating pose: $oldName")
-                    poseObject.put("english_name", updatedPose.name)
-                    poseObject.put("pose_description", updatedPose.description)
-                    poseObject.put("pose_benefits", updatedPose.benefits)
+    fun savePoses(poses: MutableList<Pose>, categories: MutableList<JSONObject>) {
+        try {
+            val jsonObject = getJsonObject() // Load existing data first
+            val existingTrainings = loadTrainingsFromJson() // Preserve existing trainings
+
+            // Update poses array
+            val posesArray = JSONArray().apply {
+                poses.forEach { pose ->
+                    JSONObject().apply {
+                        put("uuid", pose.uuid)
+                        put("english_name", pose.name)
+                        put("pose_description", pose.description)
+                        put("pose_benefits", pose.benefits)
+                        put("category_name", JSONArray(pose.categories))
+                        put("local_svg_path", pose.localImagePath)
+                    }.also { put(it) }
+                }
+            }
+            jsonObject.put("poses", posesArray)
+
+            // Update categories
+            val categoriesArray = JSONArray(categories)
+            jsonObject.put("categories", categoriesArray)
+
+            // Preserve existing trainings
+            val trainingsArray = jsonObject.optJSONArray("trainings") ?: JSONArray()
+            jsonObject.put("trainings", trainingsArray)
+
+            File(MainActivity.poseDataFilePath).writeText(jsonObject.toString(4))
+            Log.i("Save", "Data saved successfully")
+        } catch (e: Exception) {
+            Log.e("Error", "Save failed: ${e.stackTraceToString()}")
+        }
+    }
+
+    fun updatePoseInJson(updatedPose: Pose, oldUUID: String, context: Context) {
+        try {
+            // 1. Load COMPLETE existing data first
+            val jsonObject = getJsonObject()
+            val categoriesArray = jsonObject.getJSONArray("categories")
+            val trainingsArray = jsonObject.optJSONArray("trainings") ?: JSONArray()
+
+            // 2. Update pose in poses array
+            val posesArray = jsonObject.getJSONArray("poses")
+            for (i in 0 until posesArray.length()) {
+                val poseObject = posesArray.getJSONObject(i)
+                if (poseObject.getString("uuid") == oldUUID) {
+                    poseObject.apply {
+                        put("english_name", updatedPose.name)
+                        put("pose_description", updatedPose.description)
+                        put("pose_benefits", updatedPose.benefits)
+                        put("category_name", JSONArray(updatedPose.categories))
+                    }
                     break
                 }
             }
 
-            // Save the updated JSON back to internal storage
-            context.openFileOutput(MainActivity.POSE_DATA_FILENAME, Context.MODE_PRIVATE).use { output ->
-                output.write(jsonObject.toString(4).toByteArray())
+            // 3. Preserve all data sections when saving
+            jsonObject.apply {
+                put("poses", posesArray)
+            put("categories", categoriesArray)
+                put("trainings", trainingsArray)
             }
 
-            Toast.makeText(context, "JSON file updated!", Toast.LENGTH_SHORT).show()
+            // 4. Save complete data
+            context.openFileOutput(MainActivity.POSE_DATA_FILENAME, Context.MODE_PRIVATE).use {
+                it.write(jsonObject.toString(4).toByteArray())
+            }
+
+            Toast.makeText(context, "Pose updated successfully", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(context, "Failed to update JSON", Toast.LENGTH_SHORT).show()
+            Log.e("JsonHelper", "Update error: ${e.stackTraceToString()}")
+            Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+    fun getPosesByUUIDs(poseUUIDS: List<String>): MutableList<Pose> {
+        val allPoses = loadAllPoses()
+        return poseUUIDS.mapNotNull { uuid ->
+            allPoses.firstOrNull { it.uuid == uuid }
+        }.toMutableList()
+    }
+
+    fun getPoseByUUID(uuid: String): Pose? {
+        val allPoses = loadAllPoses()
+        return allPoses.firstOrNull { it.uuid == uuid }
+    }
+
+    private fun loadAllPoses(): List<Pose> {
+        return try {
+            val jsonObject = getJsonObject()
+            jsonObject.getJSONArray("poses").let { posesArray ->
+                List(posesArray.length()) { i ->
+                    val poseJson = posesArray.getJSONObject(i)
+                    Pose(
+                        uuid = poseJson.getString("uuid"),
+                        name = poseJson.getString("english_name"),
+                        description = poseJson.getString("pose_description"),
+                        benefits = poseJson.getString("pose_benefits"),
+                        categories = poseJson.getJSONArray("category_name").let {
+                            List(it.length()) { idx -> it.getString(idx) }
+                        },
+                        localImagePath = poseJson.getString("local_svg_path")
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
@@ -143,7 +212,9 @@ object JsonHelper {
         }
     }
 
-    fun loadTrainingsFromJson(context: Context): MutableList<Training> {
+    //############### Training helper ###############//
+
+    fun loadTrainingsFromJson(context: Context? = null): MutableList<Training> {
         val trainings = mutableListOf<Training>()
         try {
             val jsonObject = getJsonObject()
@@ -152,30 +223,26 @@ object JsonHelper {
                 val jsonArray = jsonObject.getJSONArray("trainings")
                 for (i in 0 until jsonArray.length()) {
                     val trainingObject = jsonArray.getJSONObject(i)
-                    val name = trainingObject.getString("name")
-                    val description = trainingObject.getString("description")
-                    val posesArray = trainingObject.getJSONArray("poses")
-                    val poses = mutableListOf<Pose>()
-                    for (j in 0 until posesArray.length()) {
-                        val poseObject = posesArray.getJSONObject(j)
-                        val poseName = poseObject.getString("english_name")
-                        val poseDescription = poseObject.getString("pose_description")
-                        val poseBenefits = poseObject.getString("pose_benefits")
-                        val poseCategories = poseObject.getJSONArray("category_name").let { categoryArray ->
-                            List(categoryArray.length()) { categoryArray.getString(it) }
-                        }
-                        val localSvgPath = poseObject.getString("local_svg_path")
-                        poses.add(Pose(poseName, poseDescription, poseBenefits, poseCategories, localSvgPath))
-                    }
-                    trainings.add(Training(name, description, poses))
+                    trainings.add(
+                        Training(
+                            name = trainingObject.getString("name"),
+                            description = trainingObject.optString("description", ""),
+                            poses_by_UUID = trainingObject.getJSONArray("poses").let { posesArray ->
+                                List(posesArray.length()) { j -> posesArray.getString(j) }.toMutableList()
+                            }
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {
             Log.e("JsonHelper", "Error loading trainings: ${e.message}")
-            Toast.makeText(context, "Failed to load trainings", Toast.LENGTH_SHORT).show()
+            context?.apply {
+                Toast.makeText(this, "Failed to load trainings", Toast.LENGTH_SHORT).show()
+            }
         }
         return trainings
     }
+
 
     fun saveTrainingsToJson(trainings: List<Training>, context: Context) {
         try {
@@ -183,44 +250,42 @@ object JsonHelper {
             val trainingsArray = JSONArray()
 
             trainings.forEach { training ->
-                val trainingObject = JSONObject()
-                trainingObject.put("name", training.name)
-                trainingObject.put("description", training.description)
-                trainingObject.put("poses", JSONArray(training.poses))
-                trainingsArray.put(trainingObject)
+                JSONObject().apply {
+                    put("name", training.name)
+                    put("description", training.description)
+                    put("poses", JSONArray(training.poses_by_UUID))
+                    trainingsArray.put(this)
+                }
             }
 
             jsonObject.put("trainings", trainingsArray)
-
             file.writeText(jsonObject.toString(4))
-            Toast.makeText(context, "Trainings saved successfully", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("JsonHelper", "Error saving trainings: ${e.message}")
-            Toast.makeText(context, "Failed to save trainings", Toast.LENGTH_SHORT).show()
         }
     }
 
-    fun updateTrainingInJson(training: Training, context: Context) {
+    fun addPoseToTraining(training: Training, newPose: Pose, context: Context) {
         try {
-            val file = File(MainActivity.poseDataFilePath)
-            val json = file.readText()
-            val jsonObject = JSONObject(json)
+            val jsonObject = getJsonObject()
             val trainingsArray = jsonObject.getJSONArray("trainings")
 
             for (i in 0 until trainingsArray.length()) {
                 val trainingObject = trainingsArray.getJSONObject(i)
                 if (trainingObject.getString("name") == training.name) {
-                    trainingObject.put("description", training.description)
-                    trainingObject.put("poses", JSONArray(training.poses))
+                    // Get existing poses array
+                    val posesArray = trainingObject.getJSONArray("poses")
+                    posesArray.put(newPose.uuid)
+                    trainingObject.put("poses", posesArray)
                     break
                 }
             }
 
+            // Save the modified JSON back to file
             file.writeText(jsonObject.toString(4))
-            Toast.makeText(context, "Training updated successfully", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Log.e("JsonHelper", "Error updating training: ${e.message}")
-            Toast.makeText(context, "Failed to update training", Toast.LENGTH_SHORT).show()
+            Log.e("JsonHelper", "Error adding pose: ${e.message}")
+            Toast.makeText(context, "Failed to add pose", Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -41,12 +41,9 @@ object TrainingDialog {
     }
 
     private fun addPoseToTraining(training: Training, pose: Pose, context: Context) {
-        if (!training.poses.any { it.name == pose.name }) {
-            training.poses.add(pose)
-            JsonHelper.saveTrainingsToJson(JsonHelper.loadTrainingsFromJson(context), context)
-            Toast.makeText(context, "Pose added to ${training.name}", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "Pose already in training", Toast.LENGTH_SHORT).show()
-        }
+        training.poses_by_UUID.add(pose.uuid)
+        JsonHelper.saveTrainingsToJson(JsonHelper.loadTrainingsFromJson(context), context)
+//        Toast.makeText(context, "Pose added to ${training.name}", Toast.LENGTH_SHORT).show()
+
     }
 }

@@ -10,24 +10,30 @@ import com.example.yogaapp.dataclasses.Training
 
 
 class TrainingAdapter(
-    private val trainings: List<Training>,
-    private val onTrainingClick: (Training) -> Unit
-) : RecyclerView.Adapter<TrainingAdapter.TrainingViewHolder>() {
+    private var trainings: List<Training>,
+    private val onItemClick: (Training) -> Unit
+) : RecyclerView.Adapter<TrainingAdapter.ViewHolder>() {
 
-    class TrainingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val trainingName: TextView = itemView.findViewById(R.id.training_name)
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val textView: TextView = view.findViewById(R.id.training_name)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrainingViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.training_item, parent, false)
-        return TrainingViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.training_item, parent, false)
+        return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: TrainingViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val training = trainings[position]
-        holder.trainingName.text = training.name
-        holder.itemView.setOnClickListener { onTrainingClick(training) }
+        holder.textView.text = training.name
+        holder.itemView.setOnClickListener { onItemClick(training) }
     }
 
     override fun getItemCount() = trainings.size
+
+    fun updateData(newTrainings: List<Training>) {
+        trainings = newTrainings
+        notifyDataSetChanged()
+    }
 }

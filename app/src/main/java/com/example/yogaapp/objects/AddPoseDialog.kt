@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import com.example.yogaapp.R
 import com.example.yogaapp.dataclasses.Pose
 import org.json.JSONObject
+import java.util.UUID
 
 @SuppressLint("StaticFieldLeak")
 object AddPoseDialog {
@@ -82,6 +83,7 @@ object AddPoseDialog {
 
             if (validateInput(name, existingPoses, context)) {
                 val newPose = Pose(
+                    uuid = UUID.randomUUID().toString(),
                     name = name,
                     description = description,
                     benefits = benefits,
@@ -188,7 +190,7 @@ object AddPoseDialog {
     ): Boolean {
         return when {
             name.isBlank() -> {
-                showError("Please fill all fields", context)
+                showError("Please fill out name", context)
                 false
             }
             existingPoses.any { it.name.equals(name, true) } -> {

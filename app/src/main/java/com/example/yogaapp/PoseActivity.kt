@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.yogaapp.dataclasses.Pose
 import com.example.yogaapp.objects.AddPoseDialog
+import com.example.yogaapp.objects.JsonHelper
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -66,6 +67,7 @@ class PoseActivity : AppCompatActivity() {
 
             for (i in 0 until jsonArray.length()) {
                 val poseObject = jsonArray.getJSONObject(i)
+                val uuid = poseObject.getString("uuid")
                 val name = poseObject.getString("english_name")
                 val description = poseObject.getString("pose_description")
                 val benefits = poseObject.getString("pose_benefits")
@@ -73,7 +75,7 @@ class PoseActivity : AppCompatActivity() {
                     List(categoryArray.length()) { categoryArray.getString(it) }
                 }
                 val localSvgPath = poseObject.getString("local_svg_path")
-                poses.add(Pose(name, description, benefits, categories, localSvgPath))
+                poses.add(Pose(uuid, name, description, benefits, categories, localSvgPath))
             }
 
             poseAdapter.notifyDataSetChanged()
@@ -83,40 +85,6 @@ class PoseActivity : AppCompatActivity() {
         }
     }
 
-    private fun savePoses() {
-        try {
-            val jsonObject = JSONObject()
-            val posesArray = JSONArray()
-            for (pose in poses) {
-                val poseObject = JSONObject()
-                poseObject.put("english_name", pose.name)
-                poseObject.put("pose_description", pose.description)
-                poseObject.put("pose_benefits", pose.benefits)
-                poseObject.put("category_name", JSONArray(pose.categories))
-                poseObject.put("local_svg_path", pose.localImagePath)
-                posesArray.put(poseObject)
-
-                // Add any new categories
-                pose.categories.forEach { categoryName ->
-                    if (!categories.any { it.getString("category_name") == categoryName }) {
-                        val newCategory = JSONObject()
-                        newCategory.put("category_name", categoryName)
-                        newCategory.put("category_description", "")
-                        categories.add(newCategory)
-                    }
-                }
-            }
-            jsonObject.put("poses", posesArray)
-
-            val categoriesArray = JSONArray(categories)
-            jsonObject.put("categories", categoriesArray)
-
-            File(MainActivity.poseDataFilePath).writeText(jsonObject.toString())
-            Log.i("Save", "Poses and categories saved successfully")
-        } catch (e: Exception) {
-            Log.e("Error", "Failed to save poses and categories: ${e.message}")
-        }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -140,7 +108,7 @@ class PoseActivity : AppCompatActivity() {
         poses.add(newPose.copy(localImagePath = savedPath ?: imagePath ?: ""))
         categories.addAll(updatedCategories)
         poseAdapter.notifyDataSetChanged()
-        savePoses()
+        JsonHelper.savePoses(poses, categories)
     }
 
     private fun saveImageToInternalStorage(uri: Uri, poseName: String): String? {
