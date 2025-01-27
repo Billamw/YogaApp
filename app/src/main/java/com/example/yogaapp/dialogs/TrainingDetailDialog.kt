@@ -1,4 +1,4 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
@@ -8,10 +8,9 @@ import android.widget.EditText
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.yogaapp.PoseInTrainingAdapter
+import com.example.yogaapp.adapter.PoseInTrainingAdapter
 import com.example.yogaapp.R
 import com.example.yogaapp.dataclasses.Training
-import java.util.Collections
 
 class TrainingDetailDialog(
     private val context: Context,

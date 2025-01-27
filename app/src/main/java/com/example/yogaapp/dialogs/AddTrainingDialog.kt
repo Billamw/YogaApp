@@ -1,4 +1,4 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.yogaapp.R
-import com.example.yogaapp.TrainingAdapter
+import com.example.yogaapp.adapter.TrainingAdapter
 import com.example.yogaapp.dataclasses.Pose
 import com.example.yogaapp.dataclasses.Training
 
@@ -53,7 +53,7 @@ object AddTrainingDialog {
         dialog.show()
     }
 
-    private fun showNewTrainingDialog(context: Context, onTrainingAdded: (Training) -> Unit) {
+    fun showNewTrainingDialog(context: Context, onTrainingAdded: (Training) -> Unit) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.training_new_training_dialog, null)
         val dialog = AlertDialog.Builder(context).create()
         dialog.setView(dialogView)

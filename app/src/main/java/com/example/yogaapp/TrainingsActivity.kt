@@ -1,18 +1,15 @@
 package com.example.yogaapp
 
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.yogaapp.adapter.TrainingAdapter
 import com.example.yogaapp.dataclasses.Training
-import com.example.yogaapp.objects.AddTrainingDialog
-import com.example.yogaapp.objects.JsonHelper
-import com.example.yogaapp.objects.TrainingDetailDialog
+import com.example.yogaapp.dialogs.AddTrainingDialog
+import com.example.yogaapp.dialogs.JsonHelper
+import com.example.yogaapp.dialogs.TrainingDetailDialog
 
 class TrainingsActivity : AppCompatActivity() {
 
@@ -32,7 +29,11 @@ class TrainingsActivity : AppCompatActivity() {
         setupTrainingsList()
 
         addTrainingButton.setOnClickListener {
-            AddTrainingDialog.showTrainingDialog(this, null)
+            AddTrainingDialog.showNewTrainingDialog(this) { newTraining ->
+                trainings.add(newTraining)
+                JsonHelper.saveTrainingsToJson(trainings, this)
+                trainingsAdapter.updateData(trainings)
+            }
         }
     }
 

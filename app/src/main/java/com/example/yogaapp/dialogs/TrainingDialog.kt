@@ -1,14 +1,13 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.Button
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.yogaapp.R
-import com.example.yogaapp.TrainingAdapter
+import com.example.yogaapp.adapter.TrainingAdapter
 import com.example.yogaapp.dataclasses.Pose
 import com.example.yogaapp.dataclasses.Training
 

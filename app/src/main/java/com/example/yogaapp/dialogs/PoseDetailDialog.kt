@@ -1,19 +1,14 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.example.yogaapp.MainActivity
-import com.example.yogaapp.PoseAdapter
+import com.example.yogaapp.adapter.PoseAdapter
 import com.example.yogaapp.R
 import com.example.yogaapp.dataclasses.Pose
-import org.json.JSONObject
-import java.io.File
 
 object PoseDetailDialog{
 

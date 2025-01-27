@@ -1,4 +1,4 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
@@ -9,7 +9,7 @@ import android.widget.Toast
 import com.example.yogaapp.R
 import com.example.yogaapp.dataclasses.Training
 
-object NewTrainingDialog {
+object ShowNewTrainingDialog {
 
     fun showNewTrainingDialog(context: Context, onTrainingAdded: (Training) -> Unit) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.training_new_training_dialog, null)

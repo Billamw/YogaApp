@@ -1,12 +1,12 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
 import android.widget.Toast
-import com.example.yogaapp.PoseActivity
 import com.example.yogaapp.MainActivity
-import com.example.yogaapp.PoseAdapter
+import com.example.yogaapp.PoseActivity
+import com.example.yogaapp.adapter.PoseAdapter
 import com.example.yogaapp.dataclasses.Pose
 import com.example.yogaapp.dataclasses.Training
 import org.json.JSONArray

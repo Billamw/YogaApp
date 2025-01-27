@@ -1,4 +1,4 @@
-package com.example.yogaapp.objects
+package com.example.yogaapp.dialogs
 
 import android.annotation.SuppressLint
 import android.app.Activity

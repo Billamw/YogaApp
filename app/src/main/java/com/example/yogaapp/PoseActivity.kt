@@ -8,10 +8,10 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.yogaapp.adapter.PoseAdapter
 import com.example.yogaapp.dataclasses.Pose
-import com.example.yogaapp.objects.AddPoseDialog
-import com.example.yogaapp.objects.JsonHelper
-import org.json.JSONArray
+import com.example.yogaapp.dialogs.AddPoseDialog
+import com.example.yogaapp.dialogs.JsonHelper
 import org.json.JSONObject
 import java.io.File
 

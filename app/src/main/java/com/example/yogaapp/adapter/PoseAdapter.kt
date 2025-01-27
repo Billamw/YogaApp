@@ -1,4 +1,4 @@
-package com.example.yogaapp
+package com.example.yogaapp.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -9,9 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.yogaapp.R
 import com.example.yogaapp.dataclasses.Pose
-import com.example.yogaapp.objects.AddTrainingDialog
-import com.example.yogaapp.objects.PoseDetailDialog
+import com.example.yogaapp.dialogs.AddTrainingDialog
+import com.example.yogaapp.dialogs.PoseDetailDialog
 
 /**
  * An adapter for displaying a list of yoga poses in a RecyclerView.

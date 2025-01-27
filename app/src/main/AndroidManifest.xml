@@ -17,16 +17,13 @@
         android:theme="@style/Theme.YogaApp"
         tools:targetApi="31">
         <activity
+            android:name=".SessionActivity"
+            android:exported="false" />
+        <activity
             android:name=".TrainingsActivity"
             android:exported="false" />
         <activity
-            android:name=".oldcode.OldApiCallActivity"
-            android:exported="false" />
-        <activity
             android:name=".PoseActivity"
-            android:exported="false" />
-        <activity
-            android:name=".oldcode.TrainingActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
